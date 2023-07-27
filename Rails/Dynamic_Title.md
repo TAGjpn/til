@@ -32,7 +32,7 @@ end
 条件 ? 真の場合の値 : 偽の場合の値
 ```
 つまりこの記述の場合は、  
-`title`が空の場合、`base_title`を返す
+`title`が空の場合、`base_title`を返す  
 `title`が空でない場合、`"#{title} | #{base_title}"`を返す
 
 # content_forメソッドでタイトルをメソッドの引数に渡す
