@@ -99,7 +99,7 @@ class BoardsController < ApplicationController
 更新に成功すれば`true`が実行される(詳細ページへリダイレクト)  
 更新に失敗すれば`false`が実行される。(エラーメッセージを表示して編集画面を再表示)
 
-### status: :unprocessable_entityをつける理由(たぶん)
+### status: :unprocessable_entityをつける理由
 Rails7を使用している場合、デフォルトでHotwireの一部であるTurboが有効になっている。  
 Turboを使用する場合は、`status: :unprocessable_entity`をつけることでバリデーションエラー等が発生した時にHTTPステータスコード422を返すことができる。  
 ステータスコードを422に指定することでTurboがビューを再描画してフラッシュメッセージを正しく表示してくれる。  
