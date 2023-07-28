@@ -25,7 +25,7 @@ RUNTEQカリキュラムのRails基礎13で学んだ内容を復習としてま�
 <% end %>
 ```
 `<% if current_user.own?(item) %>`：条件分岐で、編集・削除ボタンを投稿したユーザーのみに表示するための記述  
-`current_user.own?(item)`：ログイン中のユーザーがそのコメントの所有者か確認する。
+`current_user.own?(item)`：ログイン中のユーザーがそのitemの所有者か確認する。
 
 ### own?メソッドの定義
 ```
