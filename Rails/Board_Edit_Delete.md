@@ -2,8 +2,6 @@
 ## このページで解説する内容について
 RUNTEQカリキュラムのRails基礎13で学んだ内容を復習としてまとめたものです。
 
-# 掲示板の編集、削除機能の実装の流れ
-
 # 自分が作成した掲示板のみ編集・削除ボタンを表示させる
 ## 編集・削除ボタンのパーシャルを作成する
 同じコードを各ビューファイルに書くよりも、パーシャルを作成して呼び出すことでコードの再利用性とメンテナンス性を向上させることができる。  
@@ -101,10 +99,13 @@ class BoardsController < ApplicationController
 更新に成功すれば`true`が実行される(詳細ページへリダイレクト)  
 更新に失敗すれば`false`が実行される。(エラーメッセージを表示して編集画面を再表示)
 
-### status: :unprocessable_entityをつける理由
-Hotwireを使用している場合、status: :unprocessable_entityをつけることでバリデーションエラー等が発生した時にHTTPステータスコード422を返すことができる。  
-このステータスコードが返されると、クライアント側のHotwireがエラーを検知し、フラッシュメッセージの表示等の適切なアクションを取るようになる。  
-Hotwireを使わない場合は不要。
+### status: :unprocessable_entityをつける理由(たぶん)
+Rails7を使用している場合、デフォルトでHotwireの一部であるTurboが有効になっている。  
+Turboを使用する場合は、`status: :unprocessable_entity`をつけることでバリデーションエラー等が発生した時にHTTPステータスコード422を返すことができる。  
+ステータスコードを422に指定することでTurboがビューを再描画してフラッシュメッセージを正しく表示してくれる。  
+
+[参考ページ1](https://zenn.dev/shita1112/books/cat-hotwire-turbo/viewer/turbo-drive) [参考ページ2](https://zenn.dev/takeyuwebinc/articles/8ebe80bf442dc2)
+
 
 ## 掲示板の削除機能
 ```
@@ -113,3 +114,11 @@ Hotwireを使わない場合は不要。
     redirect_to boards_path, status: :see_other, success: t('defaults.flash_message.deleted', item: Board.model_name.human)
   end
 ```
+`destroy`のように削除するという行為に失敗することが想定されない場合は`destroy!`を使用する。
+
+### `destroy!`を使う理由
+`@board.destroy`の場合は、万が一削除が完了しなかった場合にもそのまま処理が続けて実行されてしまう。  
+例えば、削除成功のフラッシュメッセージが表示されていても、データベースにはデータが残っているという問題が発生する。
+
+`@board.destroy!`を使うことで、万が一削除が完了しない場合は処理を中断してエラーを発生させる。  
+例外処理を行うことでユーザーにエラーメッセージを表示することも可能。
