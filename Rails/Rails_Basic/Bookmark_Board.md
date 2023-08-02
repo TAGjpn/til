@@ -1,4 +1,62 @@
+# 中間モデルを作成する
+```
+$ rails g model Bookmark user:references board:references
+```
+UserモデルとBoardモデルと外部キーを持つカラムを追加する
+## マイグレーションファイルの記述
+```
+class CreateBookmarks < ActiveRecord::Migration[7.0]
+  def change
+    create_table :bookmarks do |t|
+      t.references :user, null: false, foreign_key: true
+      t.references :board, null: false, foreign_key: true
 
+      t.timestamps
+    end
+    add_index :bookmarks, [:user_id, :board_id], unique: :true
+  end
+end
+```
+Bookmarksテーブルに`user_id`と`board_id`の複合インデックスを作成する。
+
+```
+ add_index :bookmarks, [:user_id, :board_id], unique: :true
+```
+### なぜインデックスを作成するのか？
+カラムに一意性規約のバリデーションを設定する場合はインデックスを作成する。  
+→値が一意か調べるにはカラムの値を検索する必要があるため、インデックスを作成しておくことでパフォーマンスが向上するため。
+## アソシエーションとバリデーションの設定
+```
+#/models/bookmark.rb
+
+class Bookmark < ApplicationRecord
+  belongs_to :user
+  belongs_to :board
+  validates :user_id, uniqueness: { scope: :board_id } #
+end
+```
+user_idとboard_idの組み合わせが一意であるようにするための記述(#)  
+つまり、「このuser_idはこのboard_idのスコープ内で一意である」という指定。  
+[参考ページ(特定スコープ内でuniquenessバリデーションをかける)](https://techracho.bpsinc.jp/hachi8833/2021_07_27/109827)
+```
+#/models/user.rb
+
+  has_many :bookmarks, dependent: :destroy
+  has_many :bookmark_boards, through: :bookmarks, source: :board
+```
+「このモデルがBookmarkモデルを通じて複数のBoardモデルを持っている」という関係性を作る。
+### なぜthrough:複数形, source:単数系 なのか？
+それはRailsのアソシエーションの命名規則によるものだダ。  
+through: :bookmarksの部分は、「このモデルがどのモデルを経由してbookmark_boardsと関連付けられているのか」を指定しているダ。この場合、モデル名は複数形で書くのが慣習だダ。  
+一方、source: :boardの部分は、「実際にbookmark_boardsとして参照されるオブジェクトは何か」を指定しているダ。この場合、そのオブジェクトのモデル名を単数形で書くのが慣習だダ。  
+だから、through:のあとは複数形、source:のあとは単数形になっているダナ。  
+
+[参考ページ](https://web-camp.io/magazine/archives/17680)
+```
+#/models/board.rb
+
+  has_many :bookmarks, dependent: :destroy
+```
 
 1. **Bookmark モデルとテーブルを作成する**  
 まずは、Bookmarkという名前のモデルとテーブルを作成します。カラムとしては`user_id`と`board_id`が必要です。両方とも`integer`型で、それぞれユーザーと掲示板を参照します。
