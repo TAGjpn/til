@@ -129,7 +129,7 @@ bookmarksアクション内で定義した`@bookmark_boards`に格納された�
 - ブックマークをしているか判定する機能
 
 ### ブックマークを追加する機能
-Userオブジェクトに対して`bookmark(board)`が呼び出されると、そのUserオブジェクトのブックマーク一覧(`bookmark_boards`)に引数で渡された`board`を追加する。　　
+Userオブジェクトに対して`bookmark(board)`が呼び出されると、そのUserオブジェクトのブックマーク一覧(`bookmark_boards`)に引数で渡された`board`を追加する。  
 `board`に格納された投稿idの取得は、bookmarksコントローラ内で定義する。
 
 `bookmark_boards << board`は引数で渡された`board`を`bookmark_boards`コレクションに追加するための記述。
@@ -155,6 +155,14 @@ include?メソッドを使うことで引数に渡された`(board)`が`bookmark
   def bookmark?(board)
     bookmark_boards.include?(board)
   end
+```
+以下の様にboardを起点に検索をかけるように記述するほうがいいらしい  
+
+`board`オブジェクトに紐づいた`bookmarks`に対して`pluck(:user_id)`を実行する。  
+`pluck(:user_id)`により、`board`に紐付く`bookmarks`から`user_id`のみを抽出して配列に格納する処理が行われる  
+`include?(id)により、ログイン中のユーザーのidが含まれているかを判定し真偽値で返すことができる
+```
+board.bookmarks.pluck(:user_id).include?(id)
 ```
 ##  Bookmarksコントローラにcreateアクションとdestroyアクションを定義する
 ブックマークの追加をするためのcreateアクションと削除するためのdestroyアクションを定義する
