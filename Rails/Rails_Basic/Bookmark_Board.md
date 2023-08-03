@@ -156,3 +156,29 @@ include?メソッドを使うことで引数に渡された`(board)`が`bookmark
     bookmark_boards.include?(board)
   end
 ```
+##  Bookmarksコントローラにcreateアクションとdestroyアクションを定義する
+ブックマークの追加をするためのcreateアクションと削除するためのdestroyアクションを定義する
+
+### createアクション内の記述
+1. `params[:board_id]`で取得した値から一致する掲示板を`Board`から探して`board`に格納する
+2. `current_user`に対して`bookmark(board)`メソッドを呼び出す→メソッド内の処理により中間テーブルに追加される
+3. `boards_path`にリダイレクトし、フラッシュメッセージを表示する
+```
+  def create
+    board = Board.find(params[:board_id])
+    current_user.bookmark(board)
+    redirect_to boards_path, status: :see_other, success: t('.success')
+  end
+```
+
+### destroyアクションの記述
+1. `current_user`の中間テーブル(`bookmarks`)から`params[:id]`と一致する掲示板(`board`)を取得して`board`に格納する
+2. `current_user`に対して`unbookmark(board)`メソッドを呼び出す→メソッド内の処理により中間テーブルから削除される
+3. `boards_path`にリダイレクトし、フラッシュメッセージを表示する
+```
+  def destroy
+    board = current_user.bookmarks.find(params[:id]).board
+    current_user.unbookmark(board)
+    redirect_to boards_path, status: :see_other, success: t('.success')
+  end
+```
