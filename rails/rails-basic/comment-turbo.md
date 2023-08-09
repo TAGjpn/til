@@ -24,19 +24,12 @@ createアクションで`@comment.save`をした際に、エラーが発生す�
 #create.turbo_stream.erb
 
 <% if @comment.errors.present? %>
-  <%= turbo_stream.replace 'comment-form' do %>
-    <%= render 'comments/form', comment: @comment, board: @comment.board %>
-  <% end %>
+  エラー発生時の処理
 <% else %>
-  <%= turbo_stream.prepend 'table-comment' do %>
-    <%= render 'comments/comment', comment: @comment %>
-  <% end %>
-  <%= turbo_stream.replace 'comment-form' do %>
-    <%= render 'comments/form', comment: Comment.new, board: @comment.board %>
-  <% end %>
+  エラーが無い時の処理
 <% end %>
 ```
-### エラー発生時の処理
+### エラー発生時の処理(true)
 新たにコメントフォームをレンダリングし、非同期で置き換える。  
 そうすることで、入力内容はリセットせずにバリデーションエラーメッセージを表示させることができる。
 
@@ -44,5 +37,15 @@ createアクションで`@comment.save`をした際に、エラーが発生す�
 ```
 <%= turbo_stream.replace 'comment-form' do %>
   <%= render 'comments/form', comment: @comment, board: @comment.board %>
+<% end %>
+```
+### エラーが無い時の処理(false)
+
+```
+<%= turbo_stream.prepend 'table-comment' do %>
+  <%= render 'comments/comment', comment: @comment %>
+<% end %>
+<%= turbo_stream.replace 'comment-form' do %>
+  <%= render 'comments/form', comment: Comment.new, board: @comment.board %>
 <% end %>
 ```
