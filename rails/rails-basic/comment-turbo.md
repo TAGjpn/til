@@ -29,7 +29,7 @@ createアクションで`@comment.save`をした際に、エラーが発生す�
   #エラーが無い時の処理
 <% end %>
 ```
-### エラー発生時の処理(true)
+### ◆エラー発生時の処理(true)
 新たにコメントフォームをレンダリングし、非同期で置き換える。  
 そうすることで、入力内容はリセットせずにバリデーションエラーメッセージを表示させることができる。
 
@@ -39,7 +39,7 @@ createアクションで`@comment.save`をした際に、エラーが発生す�
   <%= render 'comments/form', comment: @comment, board: @comment.board %>
 <% end %>
 ```
-### エラーが無い時の処理(false)
+### ◆エラーが無い時の処理(false)
 #### 投稿したコメントをコメント一覧の一番上に表示する
 `turbo_stream.prepend`で`table-comment`の先頭に非同期的に追加することができる。  
 インスタンス変数`@comment`からローカル変数`comment`へ値を渡しパーシャルでコメント内容を表示する。
@@ -56,4 +56,28 @@ createアクションで`@comment.save`をした際に、エラーが発生す�
 <%= turbo_stream.replace 'comment-form' do %>
   <%= render 'comments/form', comment: Comment.new, board: @comment.board %>
 <% end %>
+```
+# コメント削除時の流れ
+## 1.destroyアクションが実行される
+削除ボタンを押してDELETEリクエストが送信されると、destroyアクションが呼び出される。
+```
+  def destroy
+    @comment = current_user.comments.find(params[:id])
+    @comment.destroy!
+  end
+```
+destroyアクションでは以下の処理が行われる。
+- ログイン中のユーザーのcommentsコレクションから、送信されたidのコメントを探してインスタンス変数`@comment`に格納する
+- `@comment`のデータをデータベースから削除する
+- 削除に失敗した場合は例外`ActiveRecord::RecordNotDestroyed`を発生させる
+- Railsの規約に基づき`destroy.turbo_stream.erb`がレンダリングされる
+
+## 2.コメント一覧からコメントを取り除く
+`turbo_stream.remove`で、IDが`"comment-#{@comment.id}"`の要素を削除する。
+
+### なぜ、destroyアクション後も`@comment`の値が使えるのか？
+destroyアクションで`@comment`をデータベースから削除したが、メモリ上にオブジェクトとしてデータが残るので`@comment.id`をビュー内で使うことができる。  
+メモリ上のデータはリクエスト終了、もしくはガベージコレクション（未使用のメモリを自動的に解放する仕組み）が行われると破棄される。
+```
+<%= turbo_stream.remove "comment-#{@comment.id}"%>
 ```
