@@ -1,2 +1,2 @@
 - ページネーションの作成：[kaminari](https://github.com/kaminari/kaminari#configuring-kaminari)
-
+- kaminariのBootstrapスタイル:[bootstrap5-kaminari-views](https://github.com/felipecalvo/bootstrap5-kaminari-views)
